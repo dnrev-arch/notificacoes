@@ -1,0 +1,22 @@
+{
+  "name": "pix-notifier",
+  "version": "1.0.0",
+  "description": "PWA para notificações de PIX gerados no Kirvano",
+  "main": "server-simples.js",
+  "scripts": {
+    "start": "node server-simples.js",
+    "dev": "node server-simples.js"
+  },
+  "keywords": [
+    "pix",
+    "notifier",
+    "pwa",
+    "kirvano",
+    "notifications"
+  ],
+  "author": "PIX Notifier",
+  "license": "MIT",
+  "engines": {
+    "node": ">=12.0.0"
+  }
+}
