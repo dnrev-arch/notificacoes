@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#10b981">
+    <title>💰 PIX Notifier</title>
+    <link rel="manifest" href="manifest.json">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            min-height: 100vh;
+            color: #333;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .status.active {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status.inactive {
+            background: #fecaca;
+            color: #991b1b;
+        }
+
+        .status.waiting {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .config-section {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+
+        .config-section h2 {
+            font-size: 20px;
+            margin-bottom: 16px;
+            color: #1f2937;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.2s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #10b981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+
+        .btn {
+            width: 100%;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+            box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #10b981;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .pix-list {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+
+        .pix-item {
+            background: #f8fafc;
+            border-left: 4px solid #10b981;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+
+        .pix-item.new {
+            background: #d1fae5;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        .pix-customer {
+            font-weight: 600;
+            color: #1f2937;
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+
+        .pix-details {
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .pix-amount {
+            color: #10b981;
+            font-weight: 700;
+            font-size: 18px;
+            margin-top: 8px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #9ca3af;
+        }
+
+        .empty-state h3 {
+            color: #6b7280;
+            margin-bottom: 8px;
+        }
+
+        .install-prompt {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            padding: 20px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(59, 130, 246, 0.3);
+        }
+
+        .install-prompt h3 {
+            margin-bottom: 12px;
+        }
+
+        .install-prompt p {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 16px;
+        }
+
+        .logs-container {
+            background: #1f2937;
+            color: #f9fafb;
+            border-radius: 12px;
+            padding: 16px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 12px;
+        }
+
+        .log-entry {
+            margin-bottom: 4px;
+            padding: 4px 0;
+            border-bottom: 1px solid #374151;
+        }
+
+        .log-time {
+            color: #9ca3af;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>💰 PIX Notifier</h1>
+            <p>Notificações em tempo real de PIX gerados</p>
+            <span class="status inactive" id="status">Configurar</span>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalPix">0</div>
+                    <div class="stat-label">PIX Pendentes</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="totalToday">0</div>
+                    <div class="stat-label">Hoje</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Install Prompt -->
+        <div class="install-prompt hidden" id="installPrompt">
+            <h3>📱 Instalar Aplicativo</h3>
+            <p>Instale na tela inicial para receber notificações mesmo com o app fechado!</p>
+            <button class="btn" id="installBtn">Instalar Agora</button>
+        </div>
+
+        <!-- Configuração -->
+        <div class="config-section" id="configSection">
+            <h2>⚙️ Configuração</h2>
+            <div class="form-group">
+                <label class="form-label">URL da API Kirvano:</label>
+                <input type="text" class="form-input" id="apiUrl" placeholder="http://seu-servidor:3000" value="http://localhost:3000">
+                <small style="color: #6b7280; font-size: 12px;">Ex: http://192.168.1.10:3000 (IP do seu servidor)</small>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Intervalo de verificação (segundos):</label>
+                <input type="number" class="form-input" id="checkInterval" value="10" min="5" max="60">
+            </div>
+            <button class="btn" id="startBtn">🚀 Iniciar Monitoramento</button>
+            <button class="btn btn-secondary hidden" id="stopBtn">⏸️ Parar Monitoramento</button>
+        </div>
+
+        <!-- Lista de PIX -->
+        <div class="pix-list hidden" id="pixList">
+            <h2 style="margin-bottom: 16px;">📋 PIX Pendentes</h2>
+            <div id="pixContainer">
+                <div class="empty-state">
+                    <h3>Nenhum PIX pendente</h3>
+                    <p>Quando um PIX for gerado, você será notificado!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Logs -->
+        <div class="config-section">
+            <h2>📊 Logs do Sistema</h2>
+            <button class="btn btn-secondary" onclick="toggleLogs()">Ver Logs</button>
+            <div class="logs-container hidden" id="logsContainer">
+                <div class="log-entry">Sistema iniciado...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============ CONFIGURAÇÃO ============
+        let apiUrl = '';
+        let checkInterval = 10;
+        let monitoringActive = false;
+        let intervalId = null;
+        let knownPixKeys = new Set();
+        let audioContext = null;
+        let deferredPrompt = null;
+
+        // ============ SERVICE WORKER ============
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('service-worker.js')
+                .then(reg => {
+                    addLog('✅ Service Worker registrado');
+                    console.log('Service Worker registrado:', reg);
+                })
+                .catch(err => {
+                    addLog('❌ Erro ao registrar Service Worker: ' + err);
+                    console.error('Erro Service Worker:', err);
+                });
+        }
+
+        // ============ INSTALL PROMPT ============
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('installPrompt').classList.remove('hidden');
+            addLog('📱 Prompt de instalação disponível');
+        });
+
+        document.getElementById('installBtn').addEventListener('click', async () => {
+            if (!deferredPrompt) {
+                alert('App já instalado ou navegador não suporta instalação');
+                return;
+            }
+            
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            
+            if (outcome === 'accepted') {
+                addLog('✅ App instalado na tela inicial!');
+                document.getElementById('installPrompt').classList.add('hidden');
+            }
+            
+            deferredPrompt = null;
+        });
+
+        // ============ CONTROLES ============
+        document.getElementById('startBtn').addEventListener('click', startMonitoring);
+        document.getElementById('stopBtn').addEventListener('click', stopMonitoring);
+
+        async function startMonitoring() {
+            apiUrl = document.getElementById('apiUrl').value.trim();
+            checkInterval = parseInt(document.getElementById('checkInterval').value);
+
+            if (!apiUrl) {
+                alert('❌ Configure a URL da API!');
+                return;
+            }
+
+            // Pedir permissão para notificações
+            if (Notification.permission === 'default') {
+                const permission = await Notification.requestPermission();
+                if (permission !== 'granted') {
+                    alert('❌ Permissão de notificação negada! Ative nas configurações do navegador.');
+                    return;
+                }
+            }
+
+            monitoringActive = true;
+            document.getElementById('status').textContent = 'Monitorando...';
+            document.getElementById('status').className = 'status active';
+            document.getElementById('configSection').classList.add('hidden');
+            document.getElementById('pixList').classList.remove('hidden');
+            document.getElementById('startBtn').classList.add('hidden');
+            document.getElementById('stopBtn').classList.remove('hidden');
+
+            addLog('🚀 Monitoramento iniciado');
+            addLog('🔍 Verificando a cada ' + checkInterval + 's');
+
+            // Primeira verificação imediata
+            await checkForNewPix();
+
+            // Verificações periódicas
+            intervalId = setInterval(checkForNewPix, checkInterval * 1000);
+        }
+
+        function stopMonitoring() {
+            monitoringActive = false;
+            if (intervalId) {
+                clearInterval(intervalId);
+                intervalId = null;
+            }
+
+            document.getElementById('status').textContent = 'Parado';
+            document.getElementById('status').className = 'status inactive';
+            document.getElementById('configSection').classList.remove('hidden');
+            document.getElementById('startBtn').classList.remove('hidden');
+            document.getElementById('stopBtn').classList.add('hidden');
+
+            addLog('⏸️ Monitoramento parado');
+        }
+
+        // ============ VERIFICAÇÃO DE PIX ============
+        async function checkForNewPix() {
+            try {
+                const response = await fetch(apiUrl + '/api/conversations');
+                
+                if (!response.ok) {
+                    throw new Error('Erro na API: ' + response.status);
+                }
+
+                const result = await response.json();
+                
+                if (!result.success) {
+                    throw new Error('API retornou erro');
+                }
+
+                const conversations = result.data;
+                
+                // Filtrar apenas PIX pendentes
+                const pendingPix = conversations.filter(conv => 
+                    (conv.funnelId && conv.funnelId.includes('_PIX') && !conv.completed && !conv.canceled) ||
+                    conv.pixWaiting === true
+                );
+
+                // Atualizar estatísticas
+                document.getElementById('totalPix').textContent = pendingPix.length;
+                
+                // Contar PIX de hoje
+                const today = new Date().toDateString();
+                const todayPix = pendingPix.filter(pix => 
+                    new Date(pix.createdAt).toDateString() === today
+                ).length;
+                document.getElementById('totalToday').textContent = todayPix;
+
+                // Detectar novos PIX
+                const newPix = pendingPix.filter(pix => !knownPixKeys.has(pix.phoneKey));
+
+                if (newPix.length > 0) {
+                    newPix.forEach(pix => {
+                        knownPixKeys.add(pix.phoneKey);
+                        notifyNewPix(pix);
+                        addLog('💰 Novo PIX: ' + pix.customerName + ' - ' + pix.amount);
+                    });
+
+                    // Tocar som
+                    playMoneySound();
+                }
+
+                // Atualizar lista visual
+                renderPixList(pendingPix);
+
+            } catch (error) {
+                addLog('❌ Erro ao verificar PIX: ' + error.message);
+                console.error('Erro:', error);
+            }
+        }
+
+        // ============ NOTIFICAÇÕES ============
+        function notifyNewPix(pix) {
+            if (Notification.permission !== 'granted') {
+                addLog('⚠️ Permissão de notificação não concedida');
+                return;
+            }
+
+            const title = '💰 Novo PIX Gerado!';
+            const body = `${pix.customerName}\n${pix.productType} - ${pix.amount || 'Valor não informado'}`;
+
+            // Notificação via Service Worker (funciona em background)
+            if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+                navigator.serviceWorker.ready.then(registration => {
+                    registration.showNotification(title, {
+                        body: body,
+                        icon: 'https://cdn-icons-png.flaticon.com/512/825/825454.png',
+                        badge: 'https://cdn-icons-png.flaticon.com/512/825/825454.png',
+                        vibrate: [200, 100, 200],
+                        tag: 'pix-' + pix.phoneKey,
+                        requireInteraction: true,
+                        data: { pixData: pix }
+                    });
+                });
+            } else {
+                // Fallback: notificação normal
+                new Notification(title, {
+                    body: body,
+                    icon: 'https://cdn-icons-png.flaticon.com/512/825/825454.png',
+                    vibrate: [200, 100, 200]
+                });
+            }
+        }
+
+        // ============ SOM DE DINHEIRO ============
+        function playMoneySound() {
+            try {
+                // Criar Web Audio API context
+                if (!audioContext) {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                }
+
+                // Tocar som de dinheiro (tom de caixa registradora)
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+
+                oscillator.frequency.value = 800;
+                oscillator.type = 'sine';
+
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.5);
+
+                // Segundo tom
+                setTimeout(() => {
+                    const osc2 = audioContext.createOscillator();
+                    const gain2 = audioContext.createGain();
+                    osc2.connect(gain2);
+                    gain2.connect(audioContext.destination);
+                    osc2.frequency.value = 1200;
+                    osc2.type = 'sine';
+                    gain2.gain.setValueAtTime(0.3, audioContext.currentTime);
+                    gain2.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+                    osc2.start(audioContext.currentTime);
+                    osc2.stop(audioContext.currentTime + 0.3);
+                }, 200);
+
+            } catch (error) {
+                console.error('Erro ao tocar som:', error);
+            }
+        }
+
+        // ============ RENDERIZAÇÃO ============
+        function renderPixList(pixList) {
+            const container = document.getElementById('pixContainer');
+            
+            if (pixList.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <h3>Nenhum PIX pendente</h3>
+                        <p>Quando um PIX for gerado, você será notificado!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            pixList.forEach(pix => {
+                const createdAt = new Date(pix.createdAt).toLocaleString('pt-BR');
+                const isNew = (Date.now() - new Date(pix.createdAt).getTime()) < 60000; // Novo se < 1 min
+
+                html += `
+                    <div class="pix-item ${isNew ? 'new' : ''}">
+                        <div class="pix-customer">👤 ${pix.customerName}</div>
+                        <div class="pix-details">
+                            📞 ${pix.phone}<br>
+                            🏷️ ${pix.productType} - ${pix.funnelId}<br>
+                            🕒 ${createdAt}
+                        </div>
+                        <div class="pix-amount">${pix.amount || 'Valor não informado'}</div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // ============ LOGS ============
+        function addLog(message) {
+            const logsContainer = document.getElementById('logsContainer');
+            const timestamp = new Date().toLocaleTimeString('pt-BR');
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry';
+            logEntry.innerHTML = `<span class="log-time">[${timestamp}]</span> ${message}`;
+            logsContainer.insertBefore(logEntry, logsContainer.firstChild);
+            
+            // Manter apenas últimos 50 logs
+            while (logsContainer.children.length > 50) {
+                logsContainer.removeChild(logsContainer.lastChild);
+            }
+        }
+
+        function toggleLogs() {
+            const logs = document.getElementById('logsContainer');
+            logs.classList.toggle('hidden');
+        }
+
+        // ============ INICIALIZAÇÃO ============
+        window.addEventListener('load', () => {
+            addLog('✅ Sistema carregado');
+            
+            // Verificar suporte a notificações
+            if (!('Notification' in window)) {
+                addLog('❌ Navegador não suporta notificações');
+                alert('Seu navegador não suporta notificações. Use Chrome ou Firefox.');
+            }
+
+            // Carregar configurações salvas
+            const savedUrl = localStorage.getItem('apiUrl');
+            if (savedUrl) {
+                document.getElementById('apiUrl').value = savedUrl;
+            }
+        });
+
+        // Salvar URL ao digitar
+        document.getElementById('apiUrl').addEventListener('input', (e) => {
+            localStorage.setItem('apiUrl', e.target.value);
+        });
+    </script>
+</body>
+</html>
