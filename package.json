@@ -4,7 +4,7 @@
   "description": "PWA para notificações de PIX gerados no Kirvano",
   "main": "server-simples.js",
   "scripts": {
-    "start": "node server-simples.js",
+    "start": "npx http-server -p 3000",
     "dev": "node server-simples.js"
   },
   "keywords": [
